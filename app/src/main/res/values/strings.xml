@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GymPIP</string>
+    <string name="gym_pip">Gym PIP</string>
+    <string name="register">REGISTER</string>
 </resources>
