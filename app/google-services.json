@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "567693791814",
+    "project_id": "gympip",
+    "storage_bucket": "gympip.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567693791814:android:124b13e113f651b9023047",
+        "android_client_info": {
+          "package_name": "com.example.gympip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAF5izR0UgspQDIMf3uv0t9sloU7f63XSE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
