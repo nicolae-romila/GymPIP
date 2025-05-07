@@ -6,4 +6,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/jimpoz"
-    tools:context=".MainActivity"/>
+    tools:context=".MainActivity">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/blogout"
+        android:layout_width="158dp"
+        android:layout_height="70dp"
+        android:text="LOG OUT"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.969"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.013"
+        android:onClick="logout"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

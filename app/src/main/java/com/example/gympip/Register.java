@@ -48,6 +48,13 @@ public class Register extends AppCompatActivity {
             finish();
         }
 
+        logb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), Login.class));
+            }
+        });
+
         regb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
