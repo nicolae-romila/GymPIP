@@ -52,8 +52,8 @@
         android:background="@color/black"
         android:ems="10"
         android:hint="@string/full_name"
+        android:textColorHint="#C4E49E"
         android:inputType="text"
-        android:text="@string/full_name"
         android:textAlignment="textStart"
         android:textColor="#C4E49E"
         android:textSize="22sp"
@@ -75,8 +75,9 @@
         android:background="@color/black"
         android:ems="10"
         android:hint="@string/email_adress"
+        android:textColorHint="#C4E49E"
         android:inputType="textEmailAddress"
-        android:text="@string/email_adress"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="#C4E49E"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -86,6 +87,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/flname"
         app:layout_constraintVertical_bias="0.047" />
+
 
     <EditText
         android:id="@+id/pswd"
@@ -99,7 +101,7 @@
         android:textColor="#C4E49E"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:text="@string/password"
+        android:textColorHint="#C4E49E"
         android:hint="@string/password"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -117,8 +119,9 @@
         android:background="@color/black"
         android:ems="10"
         android:hint="@string/confirm_password"
+        android:textColorHint="#C4E49E"
         android:inputType="textPassword"
-        android:text="@string/password"
+
         android:textColor="#C4E49E"
         android:textSize="22sp"
         android:textStyle="bold"
