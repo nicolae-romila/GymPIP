@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="orase_romania">
+        <item>București</item>
+        <item>Cluj-Napoca</item>
+        <item>Timișoara</item>
+        <item>Iași</item>
+        <item>Constanța</item>
+        <item>Craiova</item>
+        <item>Brașov</item>
+        <item>Galați</item>
+        <item>Ploiești</item>
+        <item>Oradea</item>
+        <item>Brăila</item>
+        <item>Arad</item>
+        <item>Pitești</item>
+        <item>Sibiu</item>
+        <item>Bacău</item>
+        <item>Târgu Mureș</item>
+        <item>Baia Mare</item>
+        <item>Buzău</item>
+        <item>Botoșani</item>
+        <item>Satu Mare</item>
+        <!-- Adaugă aici alte orașe -->
+    </string-array>
+</resources>
