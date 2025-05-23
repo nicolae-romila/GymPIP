@@ -35,6 +35,7 @@ private LocationHelper locationHelper;
 
     }
 
+
     public void profile(View v){
     startActivity(new Intent(getApplicationContext(),Profile.class));
     finish();

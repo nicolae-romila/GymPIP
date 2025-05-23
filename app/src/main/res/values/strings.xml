@@ -11,4 +11,6 @@
     <string name="sgn">Already have an account?</string>
     <string name="sign">Sign in</string>
     <string name="username">Username</string>
+    <string name="upload_image">Încarcă imagine</string>
+    <string name="profile_image_desc">Imagine profil</string>
 </resources>
