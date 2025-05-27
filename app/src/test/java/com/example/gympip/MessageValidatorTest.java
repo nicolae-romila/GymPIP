@@ -8,7 +8,7 @@ public class MessageValidatorTest {
 
     @Test
     public void validMessage_shouldReturnTrue() {
-        String msg = "Salut! Ne vedem la sală diseară?";
+        String msg = "Salut! Ne vedem la sala diseara?";
         assertTrue(validator.isValid(msg));
     }
 
