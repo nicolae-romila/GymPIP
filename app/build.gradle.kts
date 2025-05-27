@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services")  // Firebase plugin
 }
 
 android {
@@ -33,24 +33,29 @@ android {
 }
 
 dependencies {
-
+    // AndroidX libraries
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.firebase.storage)
-    implementation(libs.firebase.database)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation ("androidx.core:core:1.12.0")
-    implementation ("androidx.activity:activity:1.8.2")
-    implementation ("com.squareup.picasso:picasso:2.8")
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+
+    // Firebase (using BOM for consistent versions)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))  // Updated BOM version
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation ("com.google.firebase:firebase-firestore:24.10.0")
-    implementation ("com.google.firebase:firebase-core:21.1.1")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-firestore")
+
+    // FirebaseUI (make sure version matches BOM)
+    implementation("com.firebaseui:firebase-ui-database:8.0.2")
     implementation ("com.google.android.gms:play-services-location:21.0.1")
-    implementation ("androidx.activity:activity-ktx:1.8.2")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.firebase:firebase-storage:20.3.0")
+    implementation ("com.squareup.picasso:picasso:2.71828")
+
 }

@@ -2,7 +2,6 @@ package com.example.gympip;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
@@ -15,8 +14,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 //test
-private LocationHelper locationHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,14 +24,8 @@ private LocationHelper locationHelper;
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        locationHelper = new LocationHelper(this);
-        locationHelper.getUserLocation(location -> {
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        });
 
     }
-
 
     public void profile(View v){
     startActivity(new Intent(getApplicationContext(),Profile.class));
@@ -47,6 +38,7 @@ private LocationHelper locationHelper;
         finish();
     }
 
-
-
+    public void chatcl(View v){
+        startActivity(new Intent(getApplicationContext(), Chat_feature.class));
+    }
 }
