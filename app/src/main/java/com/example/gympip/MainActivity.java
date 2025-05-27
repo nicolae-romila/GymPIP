@@ -37,4 +37,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(getApplicationContext(), Login.class));
         finish();
     }
+    public void chat(View v){
+        startActivity((new Intent(getApplicationContext(),Chat_feature.class)));
+    }
 }

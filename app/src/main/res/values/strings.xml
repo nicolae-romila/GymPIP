@@ -10,4 +10,6 @@
     <string name="create_account">Create account</string>
     <string name="sgn">Already have an account?</string>
     <string name="sign">Sign in</string>
+    <string name="bmes">Mess</string>
+    <string name="cmesshint">...</string>
 </resources>
