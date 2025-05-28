@@ -21,78 +21,97 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class Register extends AppCompatActivity {
-    EditText fullname,emaila,password,conp;
-    Button regb,logb;
-    FirebaseAuth fauth;
+    // UI Components
+    private EditText fullname, emaila, password, conp;
+    private Button regb, logb;
+
+    // Firebase Authentication instance
+    private FirebaseAuth fauth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Enable EdgeToEdge to handle system bars nicely
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
+
+        // Set padding for system bars (status bar, navigation bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        fullname=findViewById(R.id.flname);
-        emaila=findViewById(R.id.emailadress);
-        password=findViewById(R.id.pswd);
-        regb=findViewById(R.id.cacc);
-        logb=findViewById(R.id.aha);
-        conp=findViewById(R.id.cpswd);
-        fauth=FirebaseAuth.getInstance();
 
-        if(fauth.getCurrentUser()!=null){
-            startActivity(new Intent(getApplicationContext(),MainActivity.class));
+        // Initialize UI components by linking them to XML views
+        fullname = findViewById(R.id.flname);
+        emaila = findViewById(R.id.emailadress);
+        password = findViewById(R.id.pswd);
+        conp = findViewById(R.id.cpswd);
+        regb = findViewById(R.id.cacc);
+        logb = findViewById(R.id.aha);
+
+        // Initialize Firebase Authentication instance
+        fauth = FirebaseAuth.getInstance();
+
+        // If the user is already logged in, redirect to MainActivity and close this one
+        if (fauth.getCurrentUser() != null) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
 
-        logb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), Login.class));
+        // Button to switch to Login screen
+        logb.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), Login.class)));
+
+        // Register button logic
+        regb.setOnClickListener(v -> {
+            // Retrieve input values and trim spaces
+            String email = emaila.getText().toString().trim();
+            String pas = password.getText().toString().trim();
+            String cp = conp.getText().toString().trim();
+            String name = fullname.getText().toString().trim();
+
+            // Basic validation of inputs
+            if (TextUtils.isEmpty(name)) {
+                fullname.setError("Numele este obligatoriu");
+                fullname.requestFocus();
+                return;
             }
-        });
-
-        regb.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email=emaila.getText().toString().trim();
-                String pas=password.getText().toString().trim();
-                String cp=conp.getText().toString().trim();
-
-                if(TextUtils.isEmpty(email)){
-                    emaila.setError("Email required");
-                    return;
-                }
-                if(TextUtils.isEmpty(pas)){
-                    password.setError("Password required");
-                    return;
-                }
-                if(pas.length()<6){
-                    password.setError("Password must be 6 or more characters");
-                    return;
-                }
-
-                if(!(cp.equals(pas))){
-                    conp.setError("Passwords don't match");
-                    return;
-                }
-                fauth.createUserWithEmailAndPassword(email,pas).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(Register.this, "Register successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                        }
-                        else{
-                            Toast.makeText(Register.this, "Error! "+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+            if (TextUtils.isEmpty(email)) {
+                emaila.setError("Email este obligatoriu");
+                emaila.requestFocus();
+                return;
             }
-        });
+            if (TextUtils.isEmpty(pas)) {
+                password.setError("Parola este obligatorie");
+                password.requestFocus();
+                return;
+            }
+            if (pas.length() < 6) {
+                password.setError("Parola trebuie să aibă minim 6 caractere");
+                password.requestFocus();
+                return;
+            }
+            if (!cp.equals(pas)) {
+                conp.setError("Parolele nu coincid");
+                conp.requestFocus();
+                return;
+            }
 
+            // Create user with email and password in Firebase Authentication
+            fauth.createUserWithEmailAndPassword(email, pas)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(Register.this, "Înregistrare cu succes!", Toast.LENGTH_SHORT).show();
+                            // Optionally, here you could save the full name to Realtime Database or Firestore if needed
+
+                            // Redirect to MainActivity after successful registration
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(Register.this, "Eroare: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
     }
 }

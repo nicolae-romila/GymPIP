@@ -12,52 +12,69 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth; // Adaugă import pentru FirebaseAuth
-import com.google.firebase.auth.FirebaseUser; // Adaugă import pentru FirebaseUser
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.android.gms.tasks.OnCompleteListener; // Adaugă import pentru OnCompleteListener
-import com.google.android.gms.tasks.Task; // Adaugă import pentru Task
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activitate responsabilă pentru funcționalitatea de chat.
+ * Permite utilizatorilor să trimită și să primească mesaje în timp real folosind Firebase.
+ */
 public class Chat_feature extends AppCompatActivity {
 
-    private DatabaseReference mdb; // Referința pentru mesaje
+    /** Referința la baza de date Firebase pentru mesaje */
+    private DatabaseReference mdb;
+
+    /** Câmpul de text pentru introducerea mesajului */
     private EditText txtinput;
+
+    /** Fereastra care afișează lista de mesaje */
     private RecyclerView messwindow;
+
+    /** Adapterul folosit pentru RecyclerView */
     private MessageAdapter Ma;
+
+    /** Lista de mesaje afișate */
     private List<Message> messlist;
+
+    /** Butonul pentru trimiterea mesajelor */
     private Button bsend;
 
-    // --- Modificări Minime Aici ---
-    private FirebaseAuth mAuth; // Variabila pentru Firebase Authentication
-    private String userNameFromDb; // Variabila unde vom stoca numele utilizatorului
-    // --- Sfârșit Modificări Minime ---
+    /** Obiect pentru autentificare Firebase */
+    private FirebaseAuth mAuth;
 
+    /** Numele utilizatorului obținut din baza de date */
+    private String userNameFromDb;
+
+    /**
+     * Metodă apelată la inițializarea activității.
+     * Configurează Firebase, interfața și funcționalitățile de trimitere/afișare a mesajelor.
+     *
+     * @param savedInstanceState Stare salvată anterioară (neutilizată aici)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_feature);
 
-        // Inițializare Views
         bsend = findViewById(R.id.bsend);
         txtinput = findViewById(R.id.wmessage);
         messwindow = findViewById(R.id.rec);
 
-        // Inițializare Firebase
         mdb = FirebaseDatabase.getInstance().getReference("messages");
+        mAuth = FirebaseAuth.getInstance();
 
-        // --- Modificări Minime Aici: Inițializare Auth și preluare nume ---
-        mAuth = FirebaseAuth.getInstance(); // Inițializează FirebaseAuth
-
-        FirebaseUser currentUser = mAuth.getCurrentUser(); // Obține utilizatorul curent
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // Creează o referință către numele utilizatorului în baza de date
             DatabaseReference userNameRef = FirebaseDatabase.getInstance()
                     .getReference("users")
                     .child(currentUser.getUid())
@@ -70,46 +87,34 @@ public class Chat_feature extends AppCompatActivity {
                         DataSnapshot dataSnapshot = task.getResult();
                         if (dataSnapshot.exists() && dataSnapshot.getValue() != null) {
                             userNameFromDb = dataSnapshot.getValue(String.class);
-                            // Optional: Poți afișa un Toast pentru a confirma că numele a fost încărcat
-                            // Toast.makeText(Chat_feature.this, "Nume încărcat: " + userNameFromDb, Toast.LENGTH_SHORT).show();
                         } else {
-                            userNameFromDb = "Anonim"; // Nume implicit dacă nu e setat
+                            userNameFromDb = "Anonim";
                             Toast.makeText(Chat_feature.this, "Numele nu a fost găsit în profil. Folosesc 'Anonim'.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        userNameFromDb = "Eroare Nume"; // Nume implicit în caz de eroare
+                        userNameFromDb = "Eroare Nume";
                         Toast.makeText(Chat_feature.this, "Eroare la încărcarea numelui: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         } else {
-            userNameFromDb = "Utilizator Necunoscut"; // Nume implicit dacă nu e logat
+            userNameFromDb = "Utilizator Necunoscut";
             Toast.makeText(this, "Nu sunteți autentificat pentru a trimite mesaje. Numele nu este disponibil.", Toast.LENGTH_LONG).show();
-            // Poți adăuga aici o redirecționare către ecranul de login, dacă vrei.
-            // startActivity(new Intent(this, LoginActivity.class));
-            // finish();
         }
-        // --- Sfârșit Modificări Minime ---
 
-        // Setup RecyclerView
         messlist = new ArrayList<>();
         Ma = new MessageAdapter(messlist);
         messwindow.setLayoutManager(new LinearLayoutManager(this));
         messwindow.setAdapter(Ma);
 
-        // Send message button click
         bsend.setOnClickListener(v -> {
             String txt = txtinput.getText().toString().trim();
-            // --- Modificări Minime Aici: Folosește userNameFromDb ---
-            String bid = userNameFromDb; // Acum 'bid' va conține numele preluat din baza de date
-            // --- Sfârșit Modificări Minime ---
+            String bid = userNameFromDb;
 
-            if (!txt.isEmpty() && bid != null && !bid.isEmpty()) { // Adaugă și verificare pentru bid gol
-                // Create message with timestamp
+            if (!txt.isEmpty() && bid != null && !bid.isEmpty()) {
                 String timestamp = String.valueOf(System.currentTimeMillis());
-                Message message = new Message(txt, bid, timestamp); // bid este numele expeditorului
+                Message message = new Message(txt, bid, timestamp);
 
-                // Push to Firebase
                 mdb.push().setValue(message)
                         .addOnSuccessListener(aVoid -> txtinput.setText(""))
                         .addOnFailureListener(e -> Toast.makeText(Chat_feature.this,
@@ -123,10 +128,13 @@ public class Chat_feature extends AppCompatActivity {
             }
         });
 
-        // Load messages
         loadMessages();
     }
 
+    /**
+     * Încarcă mesajele din baza de date Firebase și le actualizează în interfață.
+     * Se ascultă modificările în timp real.
+     */
     private void loadMessages() {
         mdb.addValueEventListener(new ValueEventListener() {
             @Override
@@ -152,8 +160,14 @@ public class Chat_feature extends AppCompatActivity {
         });
     }
 
+    /**
+     * Metodă apelată la apăsarea butonului de "Back" din UI.
+     * Revine la activitatea principală (MainActivity).
+     *
+     * @param v View-ul pe care s-a făcut click.
+     */
     public void chBack(View v){
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        finish(); // Adăugat finish() pentru a închide activitatea curentă
+        finish();
     }
 }

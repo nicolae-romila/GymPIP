@@ -5,33 +5,53 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.widget.Toast;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.google.firebase.firestore.DocumentSnapshot;
-import java.util.ArrayList;
-import java.util.List;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Clasa helper pentru gestionarea locației utilizatorilor,
+ * salvarea acesteia în Firestore și verificarea distanței între utilizatori.
+ */
 public class LocationHelper {
 
     private final Activity activity;
     private final FusedLocationProviderClient fusedLocationClient;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
+    /**
+     * Interfață callback pentru returnarea unei locații.
+     */
     public interface LocationCallback {
         void onLocationResult(Location location);
     }
 
+    /**
+     * Constructor pentru clasa LocationHelper.
+     *
+     * @param activity Activitatea curentă, necesară pentru context și permisiuni.
+     */
     public LocationHelper(Activity activity) {
         this.activity = activity;
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
+    /**
+     * Obține locația curentă a utilizatorului.
+     * Dacă permisiunea nu este acordată, o cere.
+     *
+     * @param callback Funcția apelată după ce locația este obținută.
+     */
     public void getUserLocation(LocationCallback callback) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -42,7 +62,7 @@ public class LocationHelper {
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(activity, location -> {
                         if (location != null) {
-                            saveCurrentUserLocationToFirestore(location); // ✅ auto-save
+                            saveCurrentUserLocationToFirestore(location); // Salvează automat locația
                             callback.onLocationResult(location);
                         } else {
                             Toast.makeText(activity, "Unable to get location", Toast.LENGTH_SHORT).show();
@@ -51,12 +71,27 @@ public class LocationHelper {
         }
     }
 
+    /**
+     * Returnează codul de cerere pentru permisiunea de locație.
+     *
+     * @return Codul numeric utilizat pentru cererea permisiunii.
+     */
     public int getPermissionRequestCode() {
         return LOCATION_PERMISSION_REQUEST_CODE;
     }
+
+    /**
+     * Interfață callback pentru a notifica dacă doi utilizatori sunt aproape unul de altul.
+     */
     public interface MatchCallback {
         void onMatchResult(boolean matched, float distanceKm);
     }
+
+    /**
+     * Salvează locația curentă a utilizatorului în Firestore.
+     *
+     * @param location Locația ce va fi salvată.
+     */
     public void saveCurrentUserLocationToFirestore(Location location) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -75,6 +110,15 @@ public class LocationHelper {
                         Toast.makeText(activity, "Failed to save location", Toast.LENGTH_SHORT).show()
                 );
     }
+
+    /**
+     * Verifică dacă doi utilizatori sunt la o distanță maximă specificată unul de altul.
+     *
+     * @param userId1       ID-ul primului utilizator.
+     * @param userId2       ID-ul celui de-al doilea utilizator.
+     * @param maxDistanceKm Distanța maximă permisă între utilizatori (în km).
+     * @param callback      Funcția apelată cu rezultatul verificării.
+     */
     public void checkIfUsersAreClose(String userId1, String userId2, float maxDistanceKm, MatchCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -95,7 +139,7 @@ public class LocationHelper {
                     loc2.setLatitude(lat2);
                     loc2.setLongitude(lon2);
 
-                    float distance = loc1.distanceTo(loc2) / 1000f; // in kilometers
+                    float distance = loc1.distanceTo(loc2) / 1000f;
 
                     callback.onMatchResult(distance <= maxDistanceKm, distance);
                 } else {
@@ -105,42 +149,44 @@ public class LocationHelper {
             });
         });
     }
-    public void matchWithUser(
-            String otherUserId,
-            float maxDistanceKm,
-            MatchCallback callback
-    ) {
-        // (A) Get & auto-save our own location
+
+    /**
+     * Verifică dacă utilizatorul curent se află în apropierea altui utilizator.
+     *
+     * @param otherUserId   ID-ul celuilalt utilizator.
+     * @param maxDistanceKm Distanța maximă permisă (în km).
+     * @param callback      Funcția apelată cu rezultatul.
+     */
+    public void matchWithUser(String otherUserId, float maxDistanceKm, MatchCallback callback) {
         getUserLocation(location -> {
             if (location == null) {
                 Toast.makeText(activity, "Unable to get your location", Toast.LENGTH_SHORT).show();
                 callback.onMatchResult(false, -1);
                 return;
             }
-            // (B) Now compare to the other user
+
             String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            checkIfUsersAreClose(
-                    currentUserId,
-                    otherUserId,
-                    maxDistanceKm,
-                    callback
-            );
+            checkIfUsersAreClose(currentUserId, otherUserId, maxDistanceKm, callback);
         });
     }
+
+    /**
+     * Interfață callback pentru returnarea unei liste de utilizatori aflați în apropiere.
+     */
     public interface NearbyCallback {
         void onNearbyFound(List<String> userIdsWithinRange);
     }
 
     /**
-     * 1. Grabs & auto-saves current user's location
-     * 2. Fetches _all_ user_locations docs
-     * 3. Filters to those within maxDistanceKm of current user
-     * 4. Returns their UIDs (excluding current user) via callback
+     * 1. Obține și salvează locația curentă.
+     * 2. Preia toate locațiile utilizatorilor din Firestore.
+     * 3. Filtrează utilizatorii aflați în raza specificată.
+     * 4. Returnează lista ID-urilor utilizatorilor găsiți în apropiere (fără utilizatorul curent).
+     *
+     * @param maxDistanceKm Distanța maximă permisă (în km).
+     * @param callback      Funcția apelată cu lista utilizatorilor aflați în apropiere.
      */
-    public void findNearbyUsers(
-            float maxDistanceKm,
-            NearbyCallback callback
-    ) {
+    public void findNearbyUsers(float maxDistanceKm, NearbyCallback callback) {
         getUserLocation(myLocation -> {
             if (myLocation == null) {
                 Toast.makeText(activity, "Cannot get your location", Toast.LENGTH_SHORT).show();
@@ -181,5 +227,4 @@ public class LocationHelper {
                     });
         });
     }
-
 }
